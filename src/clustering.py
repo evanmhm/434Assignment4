@@ -1,5 +1,6 @@
 import numpy as np
-
+import random
+import math
 
 class KMeans():
     """
@@ -22,12 +23,11 @@ class KMeans():
         :param x: input of shape (n, m)
         :return: updates the self.centers
         """
-        print(x)
         self.centers = np.zeros((self.k, x.shape[1]))
 
-        ################################
-        #      YOUR CODE GOES HERE     #
-        ################################
+        for i in range(self.k):
+            self.centers[i] = x[random.randint(0, x.shape[0])]
+
 
     def revise_centers(self, x, labels):
         """
@@ -48,9 +48,18 @@ class KMeans():
         :return: labels of (n,). Each labels[i] is the cluster index for sample x[i]
         """
         labels = np.zeros((x.shape[0]), dtype=int)
-        ##################################
-        #      YOUR CODE GOES HERE       #
-        ##################################
+
+        for i in range(x.shape[0]):
+            smallest = -1
+            l = 0
+            for j in range(self.k):
+                dist = np.linalg.norm(self.centers[j,:]-x[i,:])
+
+                if (smallest == -1 or dist < smallest):
+                    smallest = dist
+                    l = j
+            labels[i] = l
+
         return labels
 
     def get_sse(self, x, labels):
@@ -60,12 +69,11 @@ class KMeans():
         :param labels: label of (n,)
         :return: float scalar of sse
         """
-
-        ##################################
-        #      YOUR CODE GOES HERE       #
-        ##################################
-
         sse = 0.
+        for i in range(self.k):
+            cluster = np.squeeze(np.argwhere(labels == i), axis=1)
+            sse += np.linalg.norm(self.centers[i,:]-x[cluster]) ** 2.
+
         return sse
 
     def get_purity(self, x, y):
@@ -76,10 +84,25 @@ class KMeans():
         :return:
         """
         labels = self.predict(x)
-        purity = 0
-        ##################################
-        #      YOUR CODE GOES HERE       #
-        ##################################
+        purity = 0.
+        correct = 0
+        classes = []
+        # Assign class labels to clusters based on majority
+        for i in range(self.k):
+            cluster = np.squeeze(np.argwhere(labels == i), axis=1)
+            print(cluster.shape)
+            count = np.zeros(6, dtype=int)
+            for j in range(cluster.shape[0]):
+                count[y[cluster[j]] - 1] += 1
+            classes.append(np.argmax(count)+1)
+        print(classes)
+
+        for i in range(x.shape[0]):
+            if (classes[labels[i]] == y[i]):
+                correct += 1
+
+        purity = correct / y.shape[0]
+
         return purity
 
     def fit(self, x):
@@ -105,4 +128,5 @@ class KMeans():
 
             sse_vs_iter.append(sse)
 
+        # print (sse_vs_iter)
         return sse_vs_iter

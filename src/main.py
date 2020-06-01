@@ -23,7 +23,7 @@ def load_args():
                         help='set to 1 if we desire running kmeans, otherwise 0')
 
     parser.add_argument('--pca_retain_ratio', default=.9, type=float)
-    parser.add_argument('--kmeans_max_k', default=15, type=int)
+    parser.add_argument('--kmeans_max_k', default=10, type=int)
     parser.add_argument('--kmeans_max_iter', default=20, type=int)
     parser.add_argument('--root_dir', default='../data/', type=str)
     args = parser.parse_args()
@@ -94,11 +94,30 @@ def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
     ##################################
 
     for k in range(1, kmeans_max_k):
-        kmeans = KMeans(k, kmeans_max_iter)
-        sse_vs_iter = kmeans.fit(x_train)
-        train_sses_vs_iter.append(sse_vs_iter)
-        train_purities_vs_k.append(kmeans.get_purity(x_train, y_train))
-        train_sses_vs_k.append(min(sse_vs_iter))
+        sses = None
+        avg_purity = 0.
+
+        # do five tests to reduce effect of random start
+        for i in range(5):
+            kmeans = KMeans(k, kmeans_max_iter)
+            sse = kmeans.fit(x_train)
+            if (sses == None):
+                sses = sse
+            else:
+                for j in range(len(sse)):
+                    sses[j] = (sses[j] + sse[j])
+
+            avg_purity += kmeans.get_purity(x_train, y_train)
+
+        avg_purity = avg_purity / 5.
+
+        for j in range(len(sses)):
+            sses[j] = sses[j]/5.0
+        # avg_sses = np.sum(np.array(sses), 0) / 5
+
+        train_sses_vs_iter.append(sses)
+        train_purities_vs_k.append(avg_purity)
+        train_sses_vs_k.append(min(sses))
 
 
     plot_y_vs_x_list(train_sses_vs_iter, x_label='iter', y_label='sse',
