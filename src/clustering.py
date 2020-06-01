@@ -22,7 +22,7 @@ class KMeans():
         :param x: input of shape (n, m)
         :return: updates the self.centers
         """
-
+        print(x)
         self.centers = np.zeros((self.k, x.shape[1]))
 
         ################################
