@@ -65,15 +65,25 @@ class PCA():
         x = x - PCA.mean(x)
         n = x.shape[0]
 
-        covar_matrix = (1/n) * np.dot(x, x.T)
-        print(covar_matrix.shape)
-        eigval, eigvec = self.eig(covar_matrix)
-        print(eigval, eigvec)
-
         ########################################
         #       YOUR CODE GOES HERE            #
         ########################################
+        covar_matrix = PCA.cov(x)
+        eigval, eigvec = PCA.eig(covar_matrix)
+        
+        eigvec = eigvec[eigval.argsort()[::-1]]
+        eigval = eigval[eigval.argsort()[::-1]]
 
+        k=0
+        self.eig_vals = np.delete(eigval, np.s_[k:561])
+        self.eig_vecs = np.delete(eigvec, np.s_[k:561], axis=1)
+        while(np.sum(self.eig_vals) < 0.9*np.sum(eigval)):
+            k = k+1
+            self.eig_vals = np.delete(eigval, np.s_[k:561])
+            self.eig_vecs = np.delete(eigvec, np.s_[k:561], axis=1)
+        
+        self.eig_vals = np.delete(eigval, np.s_[k-1:561])
+        self.eig_vecs = np.delete(eigvec, np.s_[k-1:561], axis=1)
 
     def transform(self, x):
         """

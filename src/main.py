@@ -77,11 +77,30 @@ def plot_y_vs_x(ys_vs_x, x_label, y_label, save_path):
 
 
 def visualize(x_train, y_train):
-    pass
     ##################################
     #      YOUR CODE GOES HERE       #
     ##################################
+    fld = os.path.join(args.root_dir, 'outputs for part 2')
+    if not os.path.exists((fld)):
+        os.mkdir(fld)
+    
+    colors = {1: 'red', 2: 'green', 3: 'blue', 4: 'yellow', 5: 'orange', 6: 'cyan'}
+    pc1 = x_train[:,0]
+    pc2 = x_train[:,1]
 
+    fig, ax = plt.subplots()
+    fig.suptitle('2 component PCA')
+    plt.xlabel('Principle component 1')
+    plt.ylabel('Principle component 2')
+    gs = gridspec.GridSpec(1, 1, figure=fig)
+    
+    for g in np.unique(y_train):
+        ix = np.where(y_train == g)
+        ax.scatter(pc1[ix], pc2[ix], c = colors[g], label = g, s = 5)
+    ax.legend()
+    
+    fig.savefig(os.path.join(fld, 'plot.png'))
+    print('Saved at : %s' % fld)
 
 def apply_kmeans(do_pca, x_train, y_train, kmeans_max_iter, kmeans_max_k):
     print('kmeans\n')
