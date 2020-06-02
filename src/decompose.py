@@ -63,6 +63,13 @@ class PCA():
         self.eig_vecs = None
 
         x = x - PCA.mean(x)
+        n = x.shape[0]
+
+        covar_matrix = (1/n) * np.dot(x, x.T)
+        print(covar_matrix.shape)
+        eigval, eigvec = self.eig(covar_matrix)
+        print(eigval, eigvec)
+
         ########################################
         #       YOUR CODE GOES HERE            #
         ########################################
